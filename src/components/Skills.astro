@@ -1,0 +1,34 @@
+---
+const skills = {
+  "Frontend": ["React", "Vue", "Astro", "TypeScript", "Tailwind CSS", "Next.js"],
+  "Backend": ["Node.js", "Python", "Go", "PostgreSQL", "Redis", "GraphQL"],
+  "Tools": ["Git", "Docker", "AWS", "Figma", "Linux", "CI/CD"]
+};
+---
+
+<section id="skills" class="py-20 bg-slate-800/50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="lg:text-center mb-16">
+      <h2 class="text-base text-teal-400 font-semibold tracking-wide uppercase">Expertise</h2>
+      <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-white sm:text-4xl">
+        Skills & Technologies
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {Object.entries(skills).map(([category, items]) => (
+        <div class="bg-slate-800 rounded-xl p-8 border border-slate-700 shadow-md">
+          <h3 class="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-2">{category}</h3>
+          <div class="flex flex-wrap gap-3">
+            {items.map((skill) => (
+              <div class="flex items-center gap-2 bg-slate-900/50 px-4 py-2 rounded-lg border border-slate-700/50 hover:border-teal-500/50 transition-colors">
+                <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+                <span class="text-slate-300">{skill}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
