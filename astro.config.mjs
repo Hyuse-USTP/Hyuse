@@ -10,6 +10,9 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()]
   },
+  build: {
+    assets: 'assets', // Renames '_astro' folder to 'assets' to avoid GitHub Pages ignore issues
+  },
   site: 'https://hyuse-ustp.github.io',
   base: (isBuild || isGitHubActions) ? '/major-mercury' : '/',
 });
