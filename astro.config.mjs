@@ -9,4 +9,5 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
   site: 'https://hyuse-ustp.github.io',
+  base: '/major-mercury',
 });
