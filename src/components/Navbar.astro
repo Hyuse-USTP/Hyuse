@@ -7,22 +7,24 @@ const links = [
 ];
 ---
 
-<nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-sm border-b border-slate-800">
+<nav class="sticky top-0 z-50 bg-[#1e1e1e] border-b border-[#333]">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
-      <div class="flex-shrink-0">
-        <a href="#" class="text-xl font-bold text-teal-400">DevPortfolio</a>
+    <div class="flex items-center justify-between h-12">
+      <div class="flex-shrink-0 flex items-center gap-2">
+        <span class="text-[#27c93f]">❯</span>
+        <a href="#" class="text-sm font-bold text-[#d4d4d4] hover:text-[#27c93f] transition-colors">HYUSE_OS v1.0.4</a>
       </div>
       <div class="hidden md:block">
-        <div class="ml-10 flex items-baseline space-x-4">
-          {links.map((link) => (
+        <div class="ml-10 flex items-baseline space-x-6">
+          {links.map((link, index) => (
             <a
               href={link.href}
-              class="text-slate-300 hover:text-teal-400 hover:bg-slate-800 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300"
+              class="text-[#888] hover:text-[#27c93f] px-2 py-1 text-xs font-medium transition-colors duration-200"
             >
-              {link.name}
+              <span class="text-[#555] mr-1">M-{index + 1}</span>./{link.name.toLowerCase()}
             </a>
           ))}
+          <span class="text-[#555] text-[10px] border border-[#333] px-1 ml-4">? for help</span>
         </div>
       </div>
       <!-- Mobile menu button placeholder -->

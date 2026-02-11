@@ -18,13 +18,189 @@ const { title = "My Portfolio" } = Astro.props;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 		<title>{title}</title>
 	</head>
-	<body class="bg-slate-900 text-slate-100 flex flex-col min-h-screen">
-		<Navbar />
-		<main class="flex-grow">
-			<slot />
+	<body class="bg-[#0c0c0c] text-[#d4d4d4] flex flex-col h-screen font-['JetBrains_Mono',monospace] scanlines overflow-hidden">
+		<main class="w-full h-full overflow-x-auto overflow-y-hidden scroll-smooth flex snap-x snap-mandatory focus:outline-none" tabindex="0">
+			<div class="flex h-full">
+				<slot />
+			</div>
 		</main>
 		<Footer />
+
+		<!-- Shortcuts Help Overlay -->
+		<div id="help-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+			<div class="bg-[#1e1e1e] border border-[#27c93f] p-8 font-mono max-w-md w-full shadow-2xl">
+				<h2 class="text-[#27c93f] text-xl mb-4 border-b border-[#27c93f] pb-2">SYSTEM_SHORTCUTS</h2>
+				<div class="space-y-3 text-sm">
+					<div class="flex justify-between"><span class="text-[#ffbd2e]">[:]</span> <span>Open Command Runner</span></div>
+					<div class="flex justify-between"><span class="text-[#ffbd2e]">[Alt + 1-5]</span> <span>Jump to Window</span></div>
+					<div class="flex justify-between"><span class="text-[#ffbd2e]">[H / L]</span> <span>Scroll Left / Right</span></div>
+					<div class="flex justify-between"><span class="text-[#ffbd2e]">[?]</span> <span>Toggle Help</span></div>
+				</div>
+				<div class="mt-6 pt-4 border-t border-[#333]">
+					<h3 class="text-[#ffbd2e] text-xs mb-2 uppercase">Commands:</h3>
+					<p class="text-[10px] text-[#888]">goto [hero|about|skills|projects|contact]</p>
+					<p class="text-[10px] text-[#888]">clear (reset scroll)</p>
+				</div>
+				<button onclick="document.getElementById('help-modal').classList.add('hidden')" class="mt-6 w-full border border-[#27c93f] text-[#27c93f] py-2 hover:bg-[#27c93f] hover:text-black transition-colors">
+					CLOSE
+				</button>
+			</div>
+		</div>
+
+		<!-- Command Runner -->
+		<div id="command-runner" class="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-[110] hidden">
+			<div class="bg-[#1e1e1e] border-2 border-[#27c93f] shadow-[0_0_30px_rgba(39,201,63,0.2)] overflow-hidden">
+				<div id="suggestions" class="px-4 py-2 border-b border-[#333] hidden">
+					<div class="text-[10px] text-[#555] mb-1 uppercase tracking-widest">Available Targets</div>
+					<div id="suggestion-list" class="flex flex-wrap gap-x-4 gap-y-1">
+						<!-- Suggestions will be injected here -->
+					</div>
+				</div>
+				<div class="p-4 flex items-center gap-3">
+					<span class="text-[#27c93f] font-bold">❯</span>
+					<input type="text" id="cmd-input" class="bg-transparent border-none outline-none text-[#d4d4d4] font-mono w-full" placeholder="Enter command..." autocomplete="off" />
+				</div>
+			</div>
+		</div>
+
+		<script>
+			const scrollContainer = document.querySelector('main');
+			const sections = ['hero', 'about', 'skills', 'projects', 'contact'];
+			const helpModal = document.getElementById('help-modal');
+			const commandRunner = document.getElementById('command-runner');
+			const cmdInput = document.getElementById('cmd-input') as HTMLInputElement;
+			const suggestionsUI = document.getElementById('suggestions');
+			const suggestionList = document.getElementById('suggestion-list');
+
+			if (scrollContainer) {
+				// Mouse wheel to horizontal
+				scrollContainer.addEventListener('wheel', (evt) => {
+					evt.preventDefault();
+					scrollContainer.scrollLeft += evt.deltaY;
+				}, { passive: false });
+
+				const updateSuggestions = (val: string) => {
+					if (!suggestionList || !suggestionsUI) return;
+					
+					const query = val.toLowerCase().replace('goto ', '').trim();
+					const matches = sections.filter(s => s.startsWith(query));
+
+					if (query.length > 0 && matches.length > 0) {
+						suggestionsUI.classList.remove('hidden');
+						suggestionList.innerHTML = matches
+							.map(m => `<span class="text-xs text-[#27c93f] font-mono"><span class="text-[#555]">./</span>${m}</span>`)
+							.join('');
+					} else if (query.length === 0) {
+						suggestionsUI.classList.remove('hidden');
+						suggestionList.innerHTML = sections
+							.map(m => `<span class="text-xs text-[#888] font-mono"><span class="text-[#333]">./</span>${m}</span>`)
+							.join('');
+					} else {
+						suggestionsUI.classList.add('hidden');
+					}
+				};
+
+				cmdInput?.addEventListener('input', (e) => {
+					updateSuggestions((e.target as HTMLInputElement).value);
+				});
+
+				const executeCommand = (cmd: string) => {
+					const cleanCmd = cmd.toLowerCase().trim();
+					
+					if (cleanCmd === 'clear') {
+						scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
+					} else {
+						let targetId = cleanCmd;
+						if (cleanCmd.startsWith('goto ')) {
+							targetId = cleanCmd.split(' ')[1];
+						}
+						
+						const el = document.getElementById(targetId);
+						if (el) {
+							el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+						} else {
+							console.warn(`Target section not found: ${targetId}`);
+						}
+					}
+					
+					commandRunner?.classList.add('hidden');
+					suggestionsUI?.classList.add('hidden');
+					cmdInput.value = '';
+				};
+
+				// Listen for navigation from other components
+				window.addEventListener('terminal-nav', ((e: CustomEvent) => {
+					const targetId = e.detail;
+					const el = document.getElementById(targetId);
+					if (el) {
+						el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+					}
+				}) as EventListener);
+
+				// Keyboard shortcuts
+				window.addEventListener('keydown', (e) => {
+					// Handle Command Runner Input
+					if (commandRunner && !commandRunner.classList.contains('hidden')) {
+						if (e.key === 'Enter') {
+							executeCommand(cmdInput.value);
+						}
+						if (e.key === 'Escape' || e.key === ' ') {
+							if (e.key === ' ' && cmdInput.value.length > 0) return; // Allow spaces within commands
+							e.preventDefault();
+							commandRunner.classList.add('hidden');
+							suggestionsUI?.classList.add('hidden');
+							cmdInput.value = '';
+						}
+						return;
+					}
+
+					// Don't trigger shortcuts if user is typing in form
+					if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+						if (e.key === 'Escape') e.target.blur();
+						return;
+					}
+
+					// Open Command Runner
+					if (e.key === ':' || e.key === ' ') {
+						e.preventDefault();
+						commandRunner?.classList.remove('hidden');
+						updateSuggestions('');
+						cmdInput?.focus();
+					}
+
+					// Toggle Help
+					if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+						helpModal?.classList.toggle('hidden');
+					}
+					
+					if (e.key === 'Escape') {
+						helpModal?.classList.add('hidden');
+					}
+
+					// Navigation
+					const scrollAmount = 400;
+					if (e.key === 'l' || e.key === 'ArrowRight') {
+						scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+					}
+					if (e.key === 'h' || e.key === 'ArrowLeft') {
+						scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+					}
+
+					// Alt + Number Jump
+					if (e.altKey && !isNaN(parseInt(e.key))) {
+						const index = parseInt(e.key) - 1;
+						if (index >= 0 && index < sections.length) {
+							const target = document.querySelector(sections[index]);
+							target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+						}
+					}
+				});
+			}
+		</script>
 	</body>
 </html>

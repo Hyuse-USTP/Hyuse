@@ -1,23 +1,143 @@
-<section class="relative h-screen flex items-center justify-center overflow-hidden">
-  <div class="absolute inset-0 z-0">
-    <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 opacity-90"></div>
-    <!-- Decorative elements can go here -->
+<section id="hero" class="w-screen h-screen snap-center shrink-0 border-r border-[#333] bg-[#0c0c0c] flex flex-col overflow-hidden">
+  <!-- Terminal Title Bar -->
+  <div class="bg-[#1e1e1e] px-4 py-2 flex items-center gap-2 border-b border-[#333] shrink-0 h-10">
+    <div class="flex gap-1.5">
+      <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+      <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+      <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+    </div>
+    <div class="flex-grow text-center text-[10px] text-gray-500 font-medium">
+      greeting.sh — 80x24
+    </div>
   </div>
   
-  <div class="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-6">
-      Hello, I'm <span class="text-teal-400">CJ</span>.
-    </h1>
-    <p class="text-lg sm:text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-      A passionate Full Stack Developer crafting modern, accessible, and performant web applications.
-    </p>
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <a href="#projects" class="px-8 py-3 rounded-full bg-teal-500 text-white font-semibold hover:bg-teal-600 transition-all shadow-lg hover:shadow-teal-500/25">
-        View My Work
-      </a>
-      <a href="#contact" class="px-8 py-3 rounded-full bg-slate-800 text-teal-400 border border-slate-700 font-semibold hover:bg-slate-700 transition-all">
-        Contact Me
-      </a>
+  <div class="p-8 overflow-y-auto flex-grow flex items-center justify-center">
+    <div class="space-y-4 max-w-4xl w-full">
+      <div class="flex gap-2 text-[#27c93f]">
+        <span>[user@hyuse ~]$</span>
+        <span class="text-[#d4d4d4]">whoami</span>
+      </div>
+      
+      <div class="pl-4">
+        <h1 class="text-3xl sm:text-5xl font-bold text-white mb-4">
+          CJ (Hyuse)
+        </h1>
+        <p class="text-lg text-[#888] max-w-2xl">
+          > Full Stack Developer
+          <br />
+          > Crafting modern, accessible, and performant web applications.
+          <br />
+          > Based in the Linux kernel (metaphorically).
+        </p>
+      </div>
+
+      <div class="flex gap-2 text-[#27c93f] pt-4">
+        <span>[user@hyuse ~]$</span>
+        <span class="text-[#d4d4d4]">ls -a ./highlights</span>
+      </div>
+
+      <div class="pl-4 flex flex-wrap gap-4 pt-2">
+        <button onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'projects'}))" class="text-[#27c93f] hover:underline decoration-dashed underline-offset-4 cursor-pointer">
+          drwxr-xr-x  projects/
+        </button>
+        <button onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'contact'}))" class="text-[#ffbd2e] hover:underline decoration-dashed underline-offset-4 cursor-pointer">
+          -rw-r--r--  contact.sh
+        </button>
+        <span class="text-[#888]">
+          -rw-r--r--  resume.pdf
+        </span>
+      </div>
+
+      <div class="flex flex-col gap-2 pt-6">
+        <div class="flex gap-2 text-[#27c93f] relative">
+          <span>[user@hyuse ~]$</span>
+          <div class="flex-grow relative">
+            <input 
+              type="text" 
+              id="hero-terminal-input" 
+              class="bg-transparent border-none outline-none text-[#d4d4d4] font-mono w-full caret-[#27c93f] focus:ring-0 p-0" 
+              placeholder="" 
+              autocomplete="off"
+              autofocus
+            />
+            <!-- Inline Suggestions -->
+            <div id="hero-terminal-suggestions" class="absolute left-0 top-full mt-2 bg-[#1e1e1e] border border-[#333] p-2 hidden z-20 min-w-[200px] shadow-xl">
+              <div class="text-[9px] text-[#555] mb-1 uppercase">Suggestions</div>
+              <div id="hero-suggestion-list" class="flex flex-col gap-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        const input = document.getElementById('hero-terminal-input') as HTMLInputElement;
+        const suggestionsUI = document.getElementById('hero-terminal-suggestions');
+        const suggestionList = document.getElementById('hero-suggestion-list');
+        const targets = ['hero', 'about', 'skills', 'projects', 'contact'];
+
+        if (input) {
+          input.addEventListener('input', (e) => {
+            const val = (e.target as HTMLInputElement).value.toLowerCase().trim();
+            if (!suggestionList || !suggestionsUI) return;
+
+            const query = val.startsWith('goto ') ? val.split(' ')[1] : val;
+            const matches = targets.filter(t => t.startsWith(query || ''));
+
+            if (val.length > 0 && matches.length > 0) {
+              suggestionsUI.classList.remove('hidden');
+              suggestionList.innerHTML = matches
+                .map(m => `<div class="text-xs text-[#27c93f] font-mono cursor-pointer hover:bg-[#27c93f]/10 px-1" onclick="document.getElementById('hero-terminal-input').value='goto ${m}'; document.getElementById('hero-terminal-input').focus();">./${m}</div>`)
+                .join('');
+            } else {
+              suggestionsUI.classList.add('hidden');
+            }
+          });
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              const val = input.value.toLowerCase().trim();
+              let targetId = val;
+              if (val.startsWith('goto ')) {
+                targetId = val.split(' ')[1];
+              }
+              
+              if (targets.includes(targetId)) {
+                window.dispatchEvent(new CustomEvent('terminal-nav', {detail: targetId}));
+                input.value = '';
+                suggestionsUI?.classList.add('hidden');
+              }
+            }
+          });
+
+          // Focus input on click anywhere in the hero shell
+          document.getElementById('hero')?.addEventListener('click', () => {
+            input.focus();
+          });
+        }
+      </script>
+
+      <!-- Navigation Legend -->
+      <div class="mt-12 pt-8 border-t border-[#1e1e1e] max-w-xl">
+        <div class="text-[10px] text-[#555] mb-4 uppercase tracking-[0.2em] font-bold">System Navigation Legend</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex items-center gap-3">
+            <span class="bg-[#1e1e1e] border border-[#333] px-2 py-1 text-[#ffbd2e] text-[10px] min-w-[60px] text-center">SPACE / :</span>
+            <span class="text-xs text-[#888]">Open Command Runner</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="bg-[#1e1e1e] border border-[#333] px-2 py-1 text-[#ffbd2e] text-[10px] min-w-[60px] text-center">ALT + 1-5</span>
+            <span class="text-xs text-[#888]">Switch Windows</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="bg-[#1e1e1e] border border-[#333] px-2 py-1 text-[#ffbd2e] text-[10px] min-w-[60px] text-center">H / L / ←→</span>
+            <span class="text-xs text-[#888]">Scroll Ribbon</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="bg-[#1e1e1e] border border-[#333] px-2 py-1 text-[#ffbd2e] text-[10px] min-w-[60px] text-center">?</span>
+            <span class="text-xs text-[#888]">Show Manual (Help)</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
