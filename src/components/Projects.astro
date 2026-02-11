@@ -1,31 +1,5 @@
----
-const projects = [
-  {
-    title: "E-Commerce Platform",
-    description: "A full-featured online store with cart functionality, user authentication, and payment processing integration.",
-    tags: ["React", "Node.js", "MongoDB", "Stripe"],
-    link: "#",
-    image: "bg-blue-900" // placeholder class
-  },
-  {
-    title: "Task Management App",
-    description: "A collaborative productivity tool allowing teams to organize tasks, track progress, and communicate in real-time.",
-    tags: ["Vue.js", "Firebase", "Tailwind CSS"],
-    link: "#",
-    image: "bg-purple-900" // placeholder class
-  },
-  {
-    title: "Weather Dashboard",
-    description: "A beautiful weather application providing detailed forecasts and historical data visualization.",
-    tags: ["Next.js", "OpenWeather API", "Chart.js"],
-    link: "#",
-    image: "bg-teal-900" // placeholder class
-  }
-];
----
-
 <section id="projects" class="w-screen h-screen snap-center shrink-0 border-r border-[#333] bg-[#0c0c0c] flex flex-col overflow-hidden">
-  <!-- Terminal Title Bar -->
+  <!-- Title Bar -->
   <div class="bg-[#1e1e1e] px-4 py-2 flex items-center gap-2 border-b border-[#333] shrink-0 h-10">
     <div class="flex gap-1.5">
       <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
@@ -33,47 +7,55 @@ const projects = [
       <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
     </div>
     <div class="flex-grow text-center text-[10px] text-gray-500 font-medium">
-      projects_list.ls — 120x24
+      ls -R /projects — 80x24
     </div>
   </div>
 
-  <div class="p-8 overflow-y-auto flex-grow flex items-center justify-center">
-    <div class="space-y-6 max-w-6xl w-full">
-      <div class="flex gap-2 text-[#27c93f]">
-        <span>[user@hyuse ~]$</span>
-        <span class="text-[#d4d4d4]">ls -l ./projects</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-4">
-        {projects.map((project) => (
-          <div class="bg-[#111] border border-[#333] hover:border-[#27c93f] transition-all group p-4 flex flex-col gap-4">
-            <div class="flex items-center justify-between border-b border-[#222] pb-2">
-              <span class="text-[10px] text-[#555] font-mono uppercase tracking-tighter">Ref: {project.title.slice(0, 3).toUpperCase()}</span>
+  <div class="p-8 overflow-y-auto flex-grow flex flex-col items-center">
+    <div class="terminal-history space-y-8 max-w-4xl w-full">
+      <div>
+        <h2 class="text-2xl font-bold text-[#27c93f] mb-8">Selected Works</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="group border border-[#333] bg-[#111] p-6 hover:border-[#27c93f] transition-colors">
+            <h3 class="text-lg font-bold text-white mb-2 underline decoration-dashed underline-offset-4">NeoShell Portfolio</h3>
+            <p class="text-[#888] text-sm mb-4">A high-performance terminal-inspired portfolio built with Astro and Tailwind CSS.</p>
+            <div class="flex gap-2">
+              <span class="text-[10px] font-mono text-[#27c93f]">[ TypeScript ]</span>
+              <span class="text-[10px] font-mono text-[#27c93f]">[ Astro ]</span>
             </div>
-            
-            <div class="space-y-2">
-              <h3 class="text-sm font-bold text-[#27c93f] group-hover:underline underline-offset-4 decoration-dotted">
-                {project.title.toLowerCase().replace(/ /g, '_')}.sh
-              </h3>
-              <p class="text-xs text-[#888] leading-relaxed">
-                # {project.description}
-              </p>
-            </div>
-
-            <div class="mt-auto pt-4 flex flex-wrap gap-2">
-              {project.tags.map((tag) => (
-                <span class="text-[10px] text-[#ffbd2e] border border-[#ffbd2e]/20 px-1.5 py-0.5">
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            <a href={project.link} class="text-[10px] text-[#d4d4d4] hover:text-[#27c93f] flex items-center gap-2 mt-2">
-              <span>EXECUTING...</span>
-              <span class="animate-pulse">_</span>
-            </a>
           </div>
-        ))}
+
+          <div class="group border border-[#333] bg-[#111] p-6 hover:border-[#27c93f] transition-colors">
+            <h3 class="text-lg font-bold text-white mb-2 underline decoration-dashed underline-offset-4">TaskKernel</h3>
+            <p class="text-[#888] text-sm mb-4">Low-latency task management system with a focus on keyboard-centric navigation.</p>
+            <div class="flex gap-2">
+              <span class="text-[10px] font-mono text-[#27c93f]">[ Node.js ]</span>
+              <span class="text-[10px] font-mono text-[#27c93f]">[ React ]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Input Area -->
+    <div class="max-w-4xl w-full mt-12 shrink-0">
+      <div class="flex flex-col gap-2">
+        <div class="flex gap-2 text-[#27c93f] relative">
+          <span>[user@hyuse ~]$</span>
+          <div class="flex-grow relative">
+            <input 
+              type="text" 
+              class="terminal-input bg-transparent border-none outline-none text-[#d4d4d4] font-mono w-full caret-[#27c93f] focus:ring-0 p-0 placeholder-[#333]" 
+              placeholder="type '?' for help..." 
+              autocomplete="off"
+            />
+            <div class="terminal-suggestions absolute left-0 bottom-full mb-2 bg-[#1e1e1e] border border-[#333] p-2 hidden z-20 min-w-[200px] shadow-xl">
+              <div class="text-[9px] text-[#555] mb-1 uppercase tracking-widest">Suggestions</div>
+              <div class="suggestion-list flex flex-col gap-1"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

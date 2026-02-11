@@ -2,15 +2,67 @@
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="bg-[#0c0c0c] text-[#555] py-6 border-t border-[#333] font-mono">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-    <div class="text-[10px]">
-      <span class="text-[#27c93f]">DONE</span> -- SYSTEM_HALT: {currentYear} HYUSE_CLI. All bits reserved.
+<footer class="bg-[#111] text-[#555] h-8 border-t border-[#333] font-mono flex items-center justify-between px-4 text-[10px] shrink-0 z-50">
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-1">
+      <span class="text-[#27c93f]">●</span>
+      <span class="text-[#d4d4d4] uppercase tracking-tighter">hyuse_os</span>
     </div>
-    <div class="flex space-x-4 text-[10px]">
-      <a href="#" class="hover:text-[#d4d4d4] transition-colors">[ GITHUB ]</a>
-      <a href="#" class="hover:text-[#d4d4d4] transition-colors">[ LINKEDIN ]</a>
-      <a href="#" class="hover:text-[#d4d4d4] transition-colors">[ TWITTER ]</a>
+    <div class="h-3 w-[1px] bg-[#333]"></div>
+    <div class="flex gap-2" id="workspace-indicator">
+      <span class="text-[#27c93f]">[ 1 ]</span>
+      <span class="hover:text-[#888] cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'about'}))">[ 2 ]</span>
+      <span class="hover:text-[#888] cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'skills'}))">[ 3 ]</span>
+      <span class="hover:text-[#888] cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'projects'}))">[ 4 ]</span>
+      <span class="hover:text-[#888] cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'contact'}))">[ 5 ]</span>
     </div>
   </div>
+
+  <div class="flex items-center gap-6">
+    <div class="hidden sm:flex gap-4">
+      <div class="flex gap-2">
+        <span class="text-[#333]">CPU</span>
+        <span class="text-[#888]">12%</span>
+      </div>
+      <div class="flex gap-2">
+        <span class="text-[#333]">MEM</span>
+        <span class="text-[#888]">2.4GiB</span>
+      </div>
+    </div>
+    <div class="h-3 w-[1px] bg-[#333]"></div>
+    <div id="status-clock" class="text-[#d4d4d4]">
+      00:00:00
+    </div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const clock = document.getElementById('status-clock');
+      if (clock) {
+        const now = new Date();
+        clock.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Workspace highlight logic
+    const scrollContainer = document.querySelector('main');
+    const indicators = document.querySelectorAll('#workspace-indicator span');
+    
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', () => {
+        const index = Math.round(scrollContainer.scrollLeft / window.innerWidth);
+        indicators.forEach((span, i) => {
+          if (i === index) {
+            span.classList.add('text-[#27c93f]');
+            span.classList.remove('text-[#555]');
+          } else {
+            span.classList.remove('text-[#27c93f]');
+            span.classList.add('text-[#555]');
+          }
+        });
+      });
+    }
+  </script>
 </footer>

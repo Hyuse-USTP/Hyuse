@@ -11,130 +11,62 @@
     </div>
   </div>
   
-  <div class="p-8 overflow-y-auto flex-grow flex items-center justify-center">
-    <div class="space-y-4 max-w-4xl w-full">
-      <div class="flex gap-2 text-[#27c93f]">
-        <span>[user@hyuse ~]$</span>
-        <span class="text-[#d4d4d4]">whoami</span>
-      </div>
-      
-      <div class="pl-4">
-        <h1 class="text-3xl sm:text-5xl font-bold text-white mb-4">
-          CJ (Hyuse)
-        </h1>
-        <p class="text-lg text-[#888] max-w-2xl">
-          > Full Stack Developer
-          <br />
-          > Crafting modern, accessible, and performant web applications.
-          <br />
-          > Based in the Linux kernel (metaphorically).
-        </p>
-      </div>
+  <div class="p-8 overflow-y-auto flex-grow flex flex-col items-center">
+    <div class="terminal-history space-y-4 max-w-4xl w-full">
+      <div class="space-y-4">
+        <div class="flex gap-2 text-[#27c93f]">
+          <span>[user@hyuse ~]$</span>
+          <span class="text-[#d4d4d4]">whoami</span>
+        </div>
+        
+        <div class="pl-4">
+          <h1 class="text-3xl sm:text-5xl font-bold text-white mb-4">
+            CJ (Hyuse)
+          </h1>
+          <p class="text-lg text-[#888] max-w-2xl">
+            > Full Stack Developer
+            <br />
+            > Crafting modern, accessible, and performant web applications.
+          </p>
+        </div>
 
-      <div class="flex gap-2 text-[#27c93f] pt-4">
-        <span>[user@hyuse ~]$</span>
-        <span class="text-[#d4d4d4]">ls -a ./highlights</span>
-      </div>
+        <div class="flex gap-2 text-[#27c93f] pt-4">
+          <span>[user@hyuse ~]$</span>
+          <span class="text-[#d4d4d4]">ls -a ./highlights</span>
+        </div>
 
-      <div class="pl-4 flex flex-wrap gap-4 pt-2">
-        <button onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'projects'}))" class="text-[#27c93f] hover:underline decoration-dashed underline-offset-4 cursor-pointer">
-          drwxr-xr-x  projects/
-        </button>
-        <button onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'contact'}))" class="text-[#ffbd2e] hover:underline decoration-dashed underline-offset-4 cursor-pointer">
-          -rw-r--r--  contact.sh
-        </button>
-        <span class="text-[#888]">
-          -rw-r--r--  resume.pdf
-        </span>
+        <div class="pl-4 flex flex-wrap gap-4 pt-2">
+          <button onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'projects'}))" class="text-[#27c93f] hover:underline decoration-dashed underline-offset-4 cursor-pointer text-left">
+            drwxr-xr-x  projects/
+          </button>
+          <button onclick="window.dispatchEvent(new CustomEvent('terminal-nav', {detail: 'contact'}))" class="text-[#ffbd2e] hover:underline decoration-dashed underline-offset-4 cursor-pointer text-left">
+            -rw-r--r--  contact.sh
+          </button>
+          <span class="text-[#888]">
+            -rw-r--r--  resume.pdf
+          </span>
+        </div>
       </div>
+    </div>
 
-      <div class="flex flex-col gap-2 pt-6">
+    <!-- Active Input Area -->
+    <div class="max-w-4xl w-full mt-6 shrink-0">
+      <div class="flex flex-col gap-2">
         <div class="flex gap-2 text-[#27c93f] relative">
           <span>[user@hyuse ~]$</span>
           <div class="flex-grow relative">
             <input 
               type="text" 
-              id="hero-terminal-input" 
-              class="bg-transparent border-none outline-none text-[#d4d4d4] font-mono w-full caret-[#27c93f] focus:ring-0 p-0" 
-              placeholder="" 
+              class="terminal-input bg-transparent border-none outline-none text-[#d4d4d4] font-mono w-full caret-[#27c93f] focus:ring-0 p-0 placeholder-[#333]" 
+              placeholder="type '?' for help..." 
               autocomplete="off"
               autofocus
             />
             <!-- Inline Suggestions -->
-            <div id="hero-terminal-suggestions" class="absolute left-0 top-full mt-2 bg-[#1e1e1e] border border-[#333] p-2 hidden z-20 min-w-[200px] shadow-xl">
-              <div class="text-[9px] text-[#555] mb-1 uppercase">Suggestions</div>
-              <div id="hero-suggestion-list" class="flex flex-col gap-1"></div>
+            <div class="terminal-suggestions absolute left-0 bottom-full mb-2 bg-[#1e1e1e] border border-[#333] p-2 hidden z-20 min-w-[200px] shadow-xl">
+              <div class="text-[9px] text-[#555] mb-1 uppercase tracking-widest">Suggestions</div>
+              <div class="suggestion-list flex flex-col gap-1"></div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <script>
-        const input = document.getElementById('hero-terminal-input') as HTMLInputElement;
-        const suggestionsUI = document.getElementById('hero-terminal-suggestions');
-        const suggestionList = document.getElementById('hero-suggestion-list');
-        const targets = ['hero', 'about', 'skills', 'projects', 'contact'];
-
-        if (input) {
-          input.addEventListener('input', (e) => {
-            const val = (e.target as HTMLInputElement).value.toLowerCase().trim();
-            if (!suggestionList || !suggestionsUI) return;
-
-            const query = val.startsWith('goto ') ? val.split(' ')[1] : val;
-            const matches = targets.filter(t => t.startsWith(query || ''));
-
-            if (val.length > 0 && matches.length > 0) {
-              suggestionsUI.classList.remove('hidden');
-              suggestionList.innerHTML = matches
-                .map(m => `<div class="text-xs text-[#27c93f] font-mono cursor-pointer hover:bg-[#27c93f]/10 px-1" onclick="document.getElementById('hero-terminal-input').value='goto ${m}'; document.getElementById('hero-terminal-input').focus();">./${m}</div>`)
-                .join('');
-            } else {
-              suggestionsUI.classList.add('hidden');
-            }
-          });
-
-          input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-              const val = input.value.toLowerCase().trim();
-              let targetId = val;
-              if (val.startsWith('goto ')) {
-                targetId = val.split(' ')[1];
-              }
-              
-              if (targets.includes(targetId)) {
-                window.dispatchEvent(new CustomEvent('terminal-nav', {detail: targetId}));
-                input.value = '';
-                suggestionsUI?.classList.add('hidden');
-              }
-            }
-          });
-
-          // Focus input on click anywhere in the hero shell
-          document.getElementById('hero')?.addEventListener('click', () => {
-            input.focus();
-          });
-        }
-      </script>
-
-      <!-- Navigation Legend -->
-      <div class="mt-12 pt-8 border-t border-[#1e1e1e] max-w-xl">
-        <div class="text-[10px] text-[#555] mb-4 uppercase tracking-[0.2em] font-bold">System Navigation Legend</div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="flex items-center gap-3">
-            <span class="bg-[#1e1e1e] border border-[#333] px-2 py-1 text-[#ffbd2e] text-[10px] min-w-[60px] text-center">SPACE / :</span>
-            <span class="text-xs text-[#888]">Open Command Runner</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="bg-[#1e1e1e] border border-[#333] px-2 py-1 text-[#ffbd2e] text-[10px] min-w-[60px] text-center">ALT + 1-5</span>
-            <span class="text-xs text-[#888]">Switch Windows</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="bg-[#1e1e1e] border border-[#333] px-2 py-1 text-[#ffbd2e] text-[10px] min-w-[60px] text-center">H / L / ←→</span>
-            <span class="text-xs text-[#888]">Scroll Ribbon</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="bg-[#1e1e1e] border border-[#333] px-2 py-1 text-[#ffbd2e] text-[10px] min-w-[60px] text-center">?</span>
-            <span class="text-xs text-[#888]">Show Manual (Help)</span>
           </div>
         </div>
       </div>

@@ -24,12 +24,37 @@ const { title = "My Portfolio" } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body class="bg-[#0c0c0c] text-[#d4d4d4] flex flex-col h-screen font-['JetBrains_Mono',monospace] scanlines overflow-hidden">
-		<main class="w-full h-full overflow-x-auto overflow-y-hidden scroll-smooth flex snap-x snap-mandatory focus:outline-none" tabindex="0">
+		<main class="w-full h-full overflow-x-auto overflow-y-hidden scroll-smooth flex snap-x snap-mandatory focus:outline-none crt-power-on crt-flicker" tabindex="0">
 			<div class="flex h-full">
 				<slot />
 			</div>
 		</main>
 		<Footer />
+
+		<!-- Floating Navigation Legend -->
+		<div class="fixed bottom-12 right-6 z-[90] pointer-events-none">
+			<div class="bg-[#0c0c0c]/80 backdrop-blur-md border border-[#333] p-4 font-mono shadow-2xl rounded-sm">
+				<div class="text-[9px] text-[#555] mb-3 uppercase tracking-[0.2em] font-bold border-b border-[#1e1e1e] pb-1">System Navigation</div>
+				<div class="space-y-2">
+					<div class="flex items-center justify-between gap-6">
+						<span class="text-[#888] text-[10px]">Command Runner</span>
+						<span class="text-[#ffbd2e] text-[10px] bg-[#1e1e1e] px-1.5 py-0.5 border border-[#333]">SPACE</span>
+					</div>
+					<div class="flex items-center justify-between gap-6">
+						<span class="text-[#888] text-[10px]">Switch Window</span>
+						<span class="text-[#ffbd2e] text-[10px] bg-[#1e1e1e] px-1.5 py-0.5 border border-[#333]">ALT + 1-5</span>
+					</div>
+					<div class="flex items-center justify-between gap-6">
+						<span class="text-[#888] text-[10px]">Scroll Ribbon</span>
+						<span class="text-[#ffbd2e] text-[10px] bg-[#1e1e1e] px-1.5 py-0.5 border border-[#333]">H / L</span>
+					</div>
+					<div class="flex items-center justify-between gap-6">
+						<span class="text-[#888] text-[10px]">Show Help</span>
+						<span class="text-[#ffbd2e] text-[10px] bg-[#1e1e1e] px-1.5 py-0.5 border border-[#333]">?</span>
+					</div>
+				</div>
+			</div>
+		</div>
 
 		<!-- Shortcuts Help Overlay -->
 		<div id="help-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
@@ -53,32 +78,161 @@ const { title = "My Portfolio" } = Astro.props;
 		</div>
 
 		<!-- Command Runner -->
-		<div id="command-runner" class="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-[110] hidden">
-			<div class="bg-[#1e1e1e] border-2 border-[#27c93f] shadow-[0_0_30px_rgba(39,201,63,0.2)] overflow-hidden">
-				<div id="suggestions" class="px-4 py-2 border-b border-[#333] hidden">
-					<div class="text-[10px] text-[#555] mb-1 uppercase tracking-widest">Available Targets</div>
-					<div id="suggestion-list" class="flex flex-wrap gap-x-4 gap-y-1">
-						<!-- Suggestions will be injected here -->
+		<div id="command-runner" class="fixed inset-0 z-[110] hidden items-start justify-center pt-[20vh] bg-black/40 backdrop-blur-[2px]">
+			<div class="w-full max-w-xl px-4">
+				<div class="bg-[#1a1a1a] border-2 border-[#27c93f] shadow-[0_0_50px_rgba(39,201,63,0.15)] overflow-hidden rounded-sm">
+					<div id="suggestions" class="px-4 py-3 border-b border-[#333] bg-[#111]">
+						<div class="text-[9px] text-[#555] mb-2 uppercase tracking-[0.2em] font-bold">Search Targets</div>
+						<div id="suggestion-list" class="flex flex-wrap gap-x-6 gap-y-2">
+							<!-- Suggestions will be injected here -->
+						</div>
+					</div>
+					<div class="p-5 flex items-center gap-4 bg-[#1a1a1a]">
+						<span class="text-[#27c93f] font-bold animate-pulse">❯</span>
+						<input type="text" id="cmd-input" class="bg-transparent border-none outline-none text-[#d4d4d4] font-mono w-full text-lg" placeholder="Run command..." autocomplete="off" />
 					</div>
 				</div>
-				<div class="p-4 flex items-center gap-3">
-					<span class="text-[#27c93f] font-bold">❯</span>
-					<input type="text" id="cmd-input" class="bg-transparent border-none outline-none text-[#d4d4d4] font-mono w-full" placeholder="Enter command..." autocomplete="off" />
+				<div class="mt-4 text-center">
+					<span class="text-[9px] text-[#444] uppercase tracking-widest">Esc to cancel • Space to toggle</span>
 				</div>
 			</div>
 		</div>
 
 		<script>
 			const scrollContainer = document.querySelector('main');
-			const sections = ['hero', 'about', 'skills', 'projects', 'contact'];
+			const targets = ['hero', 'about', 'skills', 'projects', 'contact'];
 			const helpModal = document.getElementById('help-modal');
 			const commandRunner = document.getElementById('command-runner');
 			const cmdInput = document.getElementById('cmd-input') as HTMLInputElement;
 			const suggestionsUI = document.getElementById('suggestions');
 			const suggestionList = document.getElementById('suggestion-list');
 
+			function setupTerminal() {
+				const inputs = document.querySelectorAll('.terminal-input') as NodeListOf<HTMLInputElement>;
+				let activeInput: HTMLInputElement | null = inputs[0] || null;
+				
+				const observerOptions = {
+					root: scrollContainer,
+					threshold: 0.6
+				};
+
+				const observer = new IntersectionObserver((entries) => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							const input = entry.target.querySelector('.terminal-input') as HTMLInputElement;
+							if (input) {
+								activeInput = input;
+								setTimeout(() => input.focus(), 100);
+							}
+						}
+					});
+				}, observerOptions);
+
+				document.querySelectorAll('section').forEach(section => observer.observe(section));
+
+				inputs.forEach(input => {
+					const section = input.closest('section');
+					if (!section) return;
+
+					const history = section.querySelector('.terminal-history');
+					const suggestionsUI = section.querySelector('.terminal-suggestions');
+					const suggestionList = section.querySelector('.suggestion-list');
+
+					const printToTerminal = (command: string, response: string) => {
+						if (!history) return;
+						const entry = document.createElement('div');
+						entry.className = 'space-y-2 mt-4 terminal-command-result';
+						entry.innerHTML = `
+							<div class="flex gap-2 text-[#27c93f]">
+								<span>[user@hyuse ~]$</span>
+								<span class="text-[#d4d4d4]">${command}</span>
+							</div>
+							<div class="pl-4 text-[#888] text-sm leading-relaxed">${response}</div>
+						`;
+						history.appendChild(entry);
+						requestAnimationFrame(() => {
+							input.scrollIntoView({ behavior: 'smooth', block: 'end' });
+						});
+					};
+
+					input.addEventListener('input', (e) => {
+						if (activeInput !== input) return;
+						const val = (e.target as HTMLInputElement).value.toLowerCase().trim();
+						if (!suggestionList || !suggestionsUI) return;
+
+						const query = val.startsWith('goto ') ? val.split(' ')[1] : val;
+						const matches = targets.filter(t => t.startsWith(query || ''));
+
+						if (val.length > 0 && matches.length > 0) {
+							suggestionsUI.classList.remove('hidden');
+							suggestionList.innerHTML = matches
+								.map(m => `<div class="text-xs text-[#27c93f] font-mono cursor-pointer hover:bg-[#27c93f]/10 px-1" data-target="${m}">./${m}</div>`)
+								.join('');
+							
+							suggestionList.querySelectorAll('div').forEach(div => {
+								div.addEventListener('click', () => {
+									input.value = 'goto ' + div.getAttribute('data-target');
+									suggestionsUI.classList.add('hidden');
+									input.focus();
+								});
+							});
+						} else {
+							suggestionsUI.classList.add('hidden');
+						}
+					});
+
+					input.addEventListener('keydown', (e) => {
+						if (activeInput !== input) return;
+						if (e.key === 'Enter') {
+							const val = input.value.trim();
+							const cmd = val.toLowerCase();
+							if (!val) return;
+
+							if (cmd === '?' || cmd === 'help') {
+								printToTerminal(val, `
+									<div class="grid grid-cols-1 gap-1">
+										<span class="text-[#ffbd2e]">goto [target]</span> - Navigate to a section
+										<span class="text-[#ffbd2e]">ls</span> - List segments
+										<span class="text-[#ffbd2e]">whoami</span> - Identity check
+										<span class="text-[#ffbd2e]">clear</span> - Wipe command results
+									</div>
+								`);
+							} else if (cmd === 'ls') {
+								printToTerminal(val, "hero/  about/  skills/  projects/  contact/");
+							} else if (cmd === 'whoami') {
+								printToTerminal(val, "USER: hyuse | STATUS: active | SHELL: zsh");
+							} else if (cmd === 'clear') {
+								if (history) {
+									history.querySelectorAll('.terminal-command-result').forEach(el => el.remove());
+								}
+							} else if (cmd.startsWith('goto ') || targets.includes(cmd)) {
+								let targetId = cmd.startsWith('goto ') ? cmd.split(' ')[1] : cmd;
+								if (targets.includes(targetId)) {
+									printToTerminal(val, `Connecting to ${targetId}...`);
+									setTimeout(() => {
+										window.dispatchEvent(new CustomEvent('terminal-nav', {detail: targetId}));
+									}, 500);
+								} else {
+									printToTerminal(val, `sh: target not found: ${targetId}`);
+								}
+							} else {
+								printToTerminal(val, `sh: command not found: ${val}`);
+							}
+
+							input.value = '';
+							suggestionsUI?.classList.add('hidden');
+						}
+					});
+
+					section.addEventListener('click', () => {
+						if (activeInput === input) input.focus();
+					});
+				});
+			}
+
 			if (scrollContainer) {
-				// Mouse wheel to horizontal
+				setupTerminal();
+
 				scrollContainer.addEventListener('wheel', (evt) => {
 					evt.preventDefault();
 					scrollContainer.scrollLeft += evt.deltaY;
@@ -86,9 +240,8 @@ const { title = "My Portfolio" } = Astro.props;
 
 				const updateSuggestions = (val: string) => {
 					if (!suggestionList || !suggestionsUI) return;
-					
 					const query = val.toLowerCase().replace('goto ', '').trim();
-					const matches = sections.filter(s => s.startsWith(query));
+					const matches = targets.filter(s => s.startsWith(query));
 
 					if (query.length > 0 && matches.length > 0) {
 						suggestionsUI.classList.remove('hidden');
@@ -97,7 +250,7 @@ const { title = "My Portfolio" } = Astro.props;
 							.join('');
 					} else if (query.length === 0) {
 						suggestionsUI.classList.remove('hidden');
-						suggestionList.innerHTML = sections
+						suggestionList.innerHTML = targets
 							.map(m => `<span class="text-xs text-[#888] font-mono"><span class="text-[#333]">./</span>${m}</span>`)
 							.join('');
 					} else {
@@ -111,7 +264,6 @@ const { title = "My Portfolio" } = Astro.props;
 
 				const executeCommand = (cmd: string) => {
 					const cleanCmd = cmd.toLowerCase().trim();
-					
 					if (cleanCmd === 'clear') {
 						scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
 					} else {
@@ -119,83 +271,66 @@ const { title = "My Portfolio" } = Astro.props;
 						if (cleanCmd.startsWith('goto ')) {
 							targetId = cleanCmd.split(' ')[1];
 						}
-						
 						const el = document.getElementById(targetId);
-						if (el) {
-							el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-						} else {
-							console.warn(`Target section not found: ${targetId}`);
-						}
+						if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 					}
-					
 					commandRunner?.classList.add('hidden');
+					commandRunner?.classList.remove('flex');
 					suggestionsUI?.classList.add('hidden');
 					cmdInput.value = '';
 				};
 
-				// Listen for navigation from other components
 				window.addEventListener('terminal-nav', ((e: CustomEvent) => {
 					const targetId = e.detail;
 					const el = document.getElementById(targetId);
-					if (el) {
-						el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-					}
+					if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 				}) as EventListener);
 
-				// Keyboard shortcuts
 				window.addEventListener('keydown', (e) => {
-					// Handle Command Runner Input
 					if (commandRunner && !commandRunner.classList.contains('hidden')) {
-						if (e.key === 'Enter') {
-							executeCommand(cmdInput.value);
-						}
+						if (e.key === 'Enter') executeCommand(cmdInput.value);
 						if (e.key === 'Escape' || e.key === ' ') {
-							if (e.key === ' ' && cmdInput.value.length > 0) return; // Allow spaces within commands
+							if (e.key === ' ' && cmdInput.value.length > 0) return;
 							e.preventDefault();
 							commandRunner.classList.add('hidden');
+							commandRunner.classList.remove('flex');
 							suggestionsUI?.classList.add('hidden');
 							cmdInput.value = '';
 						}
 						return;
 					}
 
-					// Don't trigger shortcuts if user is typing in form
 					if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
 						if (e.key === 'Escape') e.target.blur();
 						return;
 					}
 
-					// Open Command Runner
 					if (e.key === ':' || e.key === ' ') {
 						e.preventDefault();
 						commandRunner?.classList.remove('hidden');
+						commandRunner?.classList.add('flex');
 						updateSuggestions('');
 						cmdInput?.focus();
 					}
 
-					// Toggle Help
 					if (e.key === '?' || (e.shiftKey && e.key === '/')) {
 						helpModal?.classList.toggle('hidden');
+						helpModal?.classList.toggle('flex');
 					}
 					
 					if (e.key === 'Escape') {
 						helpModal?.classList.add('hidden');
+						helpModal?.classList.remove('flex');
 					}
 
-					// Navigation
 					const scrollAmount = 400;
-					if (e.key === 'l' || e.key === 'ArrowRight') {
-						scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-					}
-					if (e.key === 'h' || e.key === 'ArrowLeft') {
-						scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-					}
+					if (e.key === 'l') scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+					if (e.key === 'h') scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
 
-					// Alt + Number Jump
 					if (e.altKey && !isNaN(parseInt(e.key))) {
 						const index = parseInt(e.key) - 1;
-						if (index >= 0 && index < sections.length) {
-							const target = document.querySelector(sections[index]);
+						if (index >= 0 && index < targets.length) {
+							const target = document.getElementById(targets[index]);
 							target?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 						}
 					}
